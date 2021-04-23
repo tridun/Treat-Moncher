@@ -9,11 +9,11 @@ h1 {
   text-align: center;
   padding-top: 40px;
   padding-bottom: 40px;
-  font-family: 'Press Start 2P', cursive;
-  color: #00FF00;
-  text-shadow: 8px 8px #000000;
+  font-family: 'Anton', sans-serif;
+  color: #AF76FF;
+  text-shadow: 8px 8px #573B80;
 }
 
 body {
-  background-color: #483D8B;
+  background-color: #FFF6B5;
 }

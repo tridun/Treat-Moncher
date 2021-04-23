@@ -7,28 +7,25 @@ class Play extends Phaser.Scene {
       // load images/tile sprites
       this.load.image('treat', './assets/treat.png');
       this.load.image('doggo', '././assets/doggo.png');
-      this.load.image('starfield', './assets/starfield.png');
+      this.load.image('field', './assets/field.png');
+      this.load.image('sky', './assets/sky.png');
       // load spritesheet
       this.load.spritesheet('woof', './assets/woof.png', {frameWidth:
         64, frameHeight: 32, startFrame: 0, endFrame: 19});
     }
 
     create() {
-        // place tile sprite
-        this.starfield = this.add.tileSprite(0, 0, 640, 480, 'starfield').setOrigin(0, 0);
-        // green UI background
-        this.add.rectangle(0, borderUISize + borderPadding, game.config.width, borderUISize * 2, 0x00FF00).setOrigin(0, 0);
+        // place sky sprite
+        this.sky = this.add.tileSprite(0, 0, 640, 480, 'sky').setOrigin(0,0);
+        // place field sprite
+        this.field = this.add.tileSprite(0, 0, 640, 480, 'field').setOrigin(0, 0);
         // add treat (p1)
         this.p1Treat = new Treat(this, game.config.width/2, game.config.height - borderUISize -borderPadding, 'treat').setOrigin(0.5, 0);
         // add doggo (x3)
         this.doggo01 = new Doggo(this, game.config.width + borderUISize*6, borderUISize*4, 'doggo', 0, 30).setOrigin(0, 0);
         this.doggo02 = new Doggo(this, game.config.width + borderUISize*3, borderUISize*5 + borderPadding*2, 'doggo', 0, 20).setOrigin(0,0);
         this.doggo03 = new Doggo(this, game.config.width, borderUISize*6 + borderPadding*4, 'doggo', 0, 10).setOrigin(0,0);
-        // white borders
-        this.add.rectangle(0, 0, game.config.width, borderUISize, 0xFFFFFF).setOrigin(0, 0);
-        this.add.rectangle(0, game.config.height - borderUISize, game.config.width, borderUISize, 0xFFFFFF).setOrigin(0, 0);
-        this.add.rectangle(0, 0, borderUISize, game.config.height, 0xFFFFFF).setOrigin(0, 0);
-        this.add.rectangle(game.config.width - borderUISize, 0, borderUISize, game.config.height, 0xFFFFFF).setOrigin(0, 0);
+
 
 
         // define keys
@@ -47,44 +44,56 @@ class Play extends Phaser.Scene {
         // initialize score
         this.p1Score = 0;
 
+
         // display score
         let scoreConfig = {
             fontFamily: 'Courier',
             fontSize: '28px',
-            backgroundColor: '#F3B141',
-            color: '#843605',
-            align: 'right',
+            backgroundColor: '#AF76FF',
+            color: '#FFFCF2',
+            align: 'center',
             padding: {
                 top: 5,
                 bottom: 5,
+                right: 5,
+                left: 5,
             },
-            fixedWidth: 100
+            fixedWidth: 200
         }
 
         this.scoreLeft = this.add.text(borderUISize + borderPadding,
-          borderUISize + borderPadding*2, this.p1Score, scoreConfig);
+          borderUISize + borderPadding*2, "SCORE: "+ this.p1Score, scoreConfig);
 
-          this.timer = game.settings.gameTimer / 1000;
+        // display time
+        let timeConfig = {
+            fontFamily: 'Courier',
+            fontSize: '28px',
+            backgroundColor: '#AF76FF',
+            color: '#FFFCF2',
+            align: 'center',
+            padding: {
+                top: 5,
+                bottom: 5,
+                left: 5,
+                right: 5,
+            },
+            fixedWidth: 200
+        }
 
-          // display time
-          let timeConfig = {
-              fontFamily: 'Courier',
-              fontSize: '28px',
-              backgroundColor: '#F3B141',
-              color: '#843605',
-              align: 'left',
-              padding: {
-                  top: 5,
-                  bottom: 5,
-              },
-              fixedWidth: 100
-          }
+        this.timeTotal = game.settings.gameTimer / 1000;
 
-          this.timeRight = this.add.text(borderUISize + borderPadding + 455,
-            borderUISize + borderPadding*2, this.timer, timeConfig);
+        this.timeRight = this.add.text(borderUISize + borderPadding + 355,
+          borderUISize + borderPadding*2, "TIME: " + this.timeTotal, timeConfig);
+
+        this.timeLeft = game.settings.gameTimer;
 
         // GAME OVER flag
         this.gameOver = false;
+
+        // countdown initialize
+        this.timer = false;
+        this.timePassed = false;
+        this.timeAdded = 0;
 
         // 60-second play clock
         scoreConfig.fixedWidth = 0;
@@ -97,6 +106,18 @@ class Play extends Phaser.Scene {
     }
 
     update() {
+        if(!this.gameOver && this.timer){
+            this.timeTotal -= 1;
+            this.timeRight.text = "TIME: " + this.timeTotal;
+            this.timer = false;
+        }else if(!this.timePassed){
+            this.time.delayedCall(1000, () => {
+                this.timePassed = false;
+                this.timer = true;
+            }, null, this);
+            this.timePassed = true;
+        }
+
         // check key input for restart
         if (this.gameOver) {
             if(Phaser.Input.Keyboard.JustDown(keyR)) {
@@ -108,7 +129,8 @@ class Play extends Phaser.Scene {
         }
 
         if (!this.gameOver) {
-            this.starfield.tilePositionX -= 4;
+            this.field.tilePositionX -= 2;
+            this.sky.tilePositionX -= 0.25;
             this.p1Treat.update();         // update treat sprite
             this.doggo01.update();           // update doggos (x3)
             this.doggo02.update();
@@ -118,14 +140,17 @@ class Play extends Phaser.Scene {
         if(this.checkCollision(this.p1Treat, this.doggo03)) {
             this.p1Treat.reset();
             this.dogBark(this.doggo03);
+            this.timeTotal += 2;
         }
         if (this.checkCollision(this.p1Treat, this.doggo02)) {
             this.p1Treat.reset();
             this.dogBark(this.doggo02);
+            this.timeTotal += 3;
         }
         if (this.checkCollision(this.p1Treat, this.doggo01)) {
             this.p1Treat.reset();
             this.dogBark(this.doggo01);
+            this.timeTotal += 4;
         }
     }
 
@@ -154,10 +179,8 @@ class Play extends Phaser.Scene {
         });
         // score add and repaint
         this.p1Score += doggo.points;
-        this.scoreLeft.text = this.p1Score;
+        this.scoreLeft.text = "SCORE: "+ this.p1Score;
         // sound effect
         this.sound.play('sfx_fancyWoof');
     }
-
-
 }
