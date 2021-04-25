@@ -93,16 +93,9 @@ class Play extends Phaser.Scene {
         // countdown initialize
         this.timer = false;
         this.timePassed = false;
-        this.timeAdded = 0;
 
         // 60-second play clock
         scoreConfig.fixedWidth = 0;
-        this.clock = this.time.delayedCall(game.settings.gameTimer
-          , () => {
-              this.add.text(game.config.width/2, game.config.height/2, 'GAME OVER', scoreConfig).setOrigin(0.5);
-              this.add.text(game.config.width/2, game.config.height/2 + 64, 'Press (R) to Restart or ← for Menu', scoreConfig).setOrigin(0.5);
-              this.gameOver = true;
-        }, null, this);
     }
 
     update() {
@@ -116,6 +109,29 @@ class Play extends Phaser.Scene {
                 this.timer = true;
             }, null, this);
             this.timePassed = true;
+        }
+
+        if(this.timeTotal == 0){
+          // game over display
+          let endConfig = {
+              fontFamily: 'Courier',
+              fontSize: '28px',
+              backgroundColor: '#AF76FF',
+              color: '#FFFCF2',
+              align: 'center',
+              padding: {
+                  top: 5,
+                  bottom: 5,
+                  left: 5,
+                  right: 5,
+              },
+              fixedWidth: 200
+          }
+          // when the clock hits 0
+          endConfig.fixedWidth = 0;
+          this.add.text(game.config.width/2, game.config.height/2, 'GAME OVER', endConfig).setOrigin(0.5);
+          this.add.text(game.config.width/2, game.config.height/2 + 64, 'Press (R) to Restart or ← for Menu', endConfig).setOrigin(0.5);
+          this.gameOver = true;
         }
 
         // check key input for restart
